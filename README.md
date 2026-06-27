@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+![NightSky](/NightSky.png)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Re-NightSky
 
-Currently, two official plugins are available:
+Re-NightSky is a small Vite-powered web experience that turns your input into a starry scene. Type a number, press **Enter**, and watch the sky fill with stars followed by a short romantic line. Use **Retry** to clear the sky and start again.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Animated stars with staggered appearance and twinkle effects.
+- Reset to try different star counts.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 20+
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Run Locally
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Then open the local URL printed in your terminal.
+
+## Scripts
+
+| Command           | Description                               |
+| ----------------- | ----------------------------------------- |
+| `npm run dev`     | Start the development server.             |
+| `npm run build`   | Type-check and create a production build. |
+| `npm run preview` | Preview the production build locally.     |
+| `npm run lint`    | Run ESLint on the project.                |
+
+## Project Structure
+
+```text
+/
+├── index.html
+├── public/
+│   ├── favicon.svg
+│   └── og-nightsky.png
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   └── App.css
+├── vite.config.ts
+└── package.json
+```
+
+## Usage Tips
+
+- Pick a number from 1 to 100 to decide how many stars will light up the sky
+- Click **Retry** to reset and try another number.
+- Enjoy the romantic message that appears with the stars!

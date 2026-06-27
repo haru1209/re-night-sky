@@ -1,17 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
 
+type Star = {
+  id: number;
+  left: number;
+  top: number;
+  twinkleDelay: number;
+  appearDelay: number;
+};
+
+const generateStars = (count: number): Star[] =>
+  Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    twinkleDelay: Math.random() * 2,
+    appearDelay: i * 0.1,
+  }));
+
 function App() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const discriptionContainerRef = useRef<HTMLDivElement>(null);
-  const discriptionRef = useRef<HTMLParagraphElement>(null);
-  const inputRowRef = useRef<HTMLDivElement>(null);
-  const inputHintRef = useRef<HTMLSpanElement>(null);
-  const sentenceRef = useRef<HTMLDivElement>(null);
-  const romanceSentenceRef = useRef<HTMLParagraphElement>(null);
-  const retryRef = useRef<HTMLDivElement>(null);
-  const authorRef = useRef<HTMLParagraphElement>(null);
 
   const enterText = "Enter a number to create a romantic sky:";
   const reEnterDiscriptionText =
@@ -24,6 +32,10 @@ function App() {
   const [discriptionText, setDiscriptionText] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [romanceSentence, setRomanceSentence] = useState("");
+  const [stars, setStars] = useState<Star[]>([]);
+  const [inputRowHidden, setInputRowHidden] = useState(true);
+  const [hideDiscription, setHideDiscription] = useState(false);
+  const [showSentence, setShowSentence] = useState(false);
 
   const typewriterEffect = (textArg: string, callback: () => void) => {
     let discriptionArr = Array.from(textArg);
@@ -51,10 +63,8 @@ function App() {
       if (n === null) {
         setInputValue("");
         setDiscriptionText("");
-        inputRowRef.current?.classList.add("hidden");
         typewriterEffect(reEnterDiscriptionText, () => {
-          inputRowRef.current?.classList.remove("hidden");
-          inputRef.current?.focus();
+          setInputRowHidden(false);
         });
         return;
       }
@@ -62,111 +72,105 @@ function App() {
       if (!Number.isInteger(n) || n < 1 || n > 100) {
         setInputValue("");
         setDiscriptionText("");
-        inputRowRef.current?.classList.add("hidden");
         typewriterEffect(outOfRangeDiscriptionText, () => {
-          inputRowRef.current?.classList.remove("hidden");
-          inputRef.current?.focus();
+          setInputRowHidden(false);
         });
         return;
       }
-      discriptionContainerRef.current?.classList.add("transparent");
-      createStars(n);
+      setHideDiscription(true);
+      setStars(generateStars(n));
     }
   };
 
-  const createStars = (count: number) => {
-    for (let i = 0; i < count; i++) {
-      let starElement = document.createElement("span");
-
-      starElement.className = "star";
-      starElement.textContent = "*";
-      starElement.style.left = Math.random() * 100 + "%";
-      starElement.style.top = Math.random() * 100 + "%";
-      setTimeout(() => {
-        containerRef.current?.appendChild(starElement);
-        if (i === count - 1) {
-          sentenceRef.current?.classList.add("show");
-          showRomnceSentence(romanceSentenceText);
-          retryRef.current?.classList.remove("btn-disabled");
-        }
-      }, 100 * i);
-    }
-  };
-
-  const showRomnceSentence = (textArg: string) => {
+  const showRomanceSentence = (textArg: string) => {
     const romanceSentenceArr = Array.from(textArg);
-    for (let i = 0; i < romanceSentenceArr.length; i++) {
-      let text = document.createElement("span");
-      text.innerHTML = romanceSentenceArr[i];
+    romanceSentenceArr.forEach((char, i) => {
       setTimeout(() => {
-        setRomanceSentence((prev) => prev + text.innerHTML);
+        setRomanceSentence((prev) => prev + char);
       }, 50 * i);
-    }
+    });
   };
 
   useEffect(() => {
-    typewriterEffect(enterText, () => {
-      inputRowRef.current?.classList.remove("hidden");
+    if (stars.length === 0) return;
+
+    const timer = setTimeout(() => {
+      setShowSentence(true);
+      showRomanceSentence(romanceSentenceText);
+    }, 100 * stars.length);
+
+    return () => clearTimeout(timer);
+  }, [stars]);
+
+  useLayoutEffect(() => {
+    if (!inputRowHidden) {
       inputRef.current?.focus();
+    }
+  }, [inputRowHidden]);
+
+  useEffect(() => {
+    typewriterEffect(enterText, () => {
+      setInputRowHidden(false);
     });
   }, []);
 
   const resetScene = () => {
-    const stars = document.querySelectorAll(".star");
-    stars.forEach((star) => {
-      star.remove();
-    });
-
-    sentenceRef.current?.classList.remove("show");
-    discriptionContainerRef.current?.classList.remove("transparent");
-    retryRef.current?.classList.add("btn-disabled");
-
+    setStars([]);
+    setShowSentence(false);
+    setHideDiscription(false);
     setInputValue("");
-
     setDiscriptionText("");
-    inputRowRef.current?.classList.add("hidden");
-    typewriterEffect(discriptionText, () => {
-      inputRowRef.current?.classList.remove("hidden");
-      inputRef.current?.focus();
-    });
+    setInputRowHidden(true);
     setRomanceSentence("");
+    typewriterEffect(enterText, () => {
+      setInputRowHidden(false);
+    });
   };
 
   return (
     <>
-      <div className="container" ref={containerRef}>
-        <div className="discription-container" ref={discriptionContainerRef}>
-          <p className="discription" ref={discriptionRef}>
-            {discriptionText}
-          </p>
-          <div className="input-row hidden" ref={inputRowRef}>
-            <span className="input-hint" ref={inputHintRef}>
-              &gt;
-            </span>
+      <div className="container">
+        {stars.map((star) => (
+          <span
+            className="star"
+            style={
+              {
+                top: star.top + "%",
+                left: star.left + "%",
+                "--twinkle-delay": star.twinkleDelay + "s",
+                "--appear-delay": star.appearDelay + "s",
+              } as React.CSSProperties
+            }
+          >
+            *
+          </span>
+        ))}
+        <div
+          className={`discription-container ${hideDiscription ? "transparent" : ""}`}
+        >
+          <p className="discription">{discriptionText}</p>
+          <div className={`input-row ${inputRowHidden ? "hidden" : ""}`}>
+            <span className="input-hint">&gt;</span>
             <input
               className="input"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
               type="text"
+              ref={inputRef}
             />
           </div>
         </div>
-        <div className="sentence" ref={sentenceRef}>
-          <p className="romance-sentence" ref={romanceSentenceRef}>
-            {romanceSentence}
-          </p>
+        <div className={`sentence ${showSentence ? "show" : ""}`}>
+          <p className="romance-sentence">{romanceSentence}</p>
           <div
-            className={`retry  ${romanceSentence ? "" : "btn-disabled"}`}
+            className={`retry  ${showSentence ? "" : "btn-disabled"}`}
             onClick={resetScene}
-            ref={retryRef}
           >
             Retry
           </div>
         </div>
-        <p className="author" ref={authorRef}>
-          By Haru 2026
-        </p>
+        <p className="author">By Haru 2026</p>
       </div>
     </>
   );
